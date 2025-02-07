@@ -1,8 +1,9 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 import { ApolloServer, HeaderMap } from '@apollo/server';
-import fastGlob from 'fast-glob';
+import { sync as fastGlobSync, convertPathToPattern } from 'fast-glob';
 
 const { GraphQL } = databases.cache;
 
@@ -64,16 +65,18 @@ export function start(options = {}) {
 
 			// Load the resolvers
 			const resolversPath = join(componentPath, config.resolvers);
-			const resolvers = await import(resolversPath);
+			const resolvers = await import(pathToFileURL(resolversPath));
 
 			// Load the schemas
+			const schemasPath = join(componentPath, config.schemas)
 			let typeDefs = BASE_SCHEMA;
-			for (const filePath of fastGlob.sync(join(componentPath, config.schemas), { onlyFiles: true })) {
+			for (const filePath of fastGlobSync(convertPathToPattern(schemasPath), { onlyFiles: true })) {
 				typeDefs += readFileSync(filePath, 'utf-8');
 			}
 
 			// Get the custom cache or use the default
-			const Cache = config.cache ? await import(join(componentPath, config.cache)) : HarperDBCache;
+			const cachePath = join(componentPath, config.cache)
+			const Cache = config.cache ? await import(pathToFileURL(cachePath)) : HarperDBCache;
 
 			// Set up Apollo Server
 			const apollo = new ApolloServer({ typeDefs, resolvers: resolvers.default || resolvers, cache: new Cache() });
