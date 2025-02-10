@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import { ApolloServer, HeaderMap } from '@apollo/server';
-import { sync as fastGlobSync, convertPathToPattern } from 'fast-glob';
+import fastGlob from 'fast-glob';
 
 const { GraphQL } = databases.cache;
 
@@ -45,10 +45,6 @@ scalar Date
 scalar Any
 `;
 
-let resolvers = {};
-let apollo_options;
-let apollo;
-
 export function start(options = {}) {
 	const config = {
 		cache: options.cache,
@@ -70,16 +66,21 @@ export function start(options = {}) {
 			// Load the schemas
 			const schemasPath = join(componentPath, config.schemas)
 			let typeDefs = BASE_SCHEMA;
-			for (const filePath of fastGlobSync(convertPathToPattern(schemasPath), { onlyFiles: true })) {
+			for (const filePath of fastGlob.sync(fastGlob.convertPathToPattern(schemasPath), { onlyFiles: true })) {
 				typeDefs += readFileSync(filePath, 'utf-8');
 			}
 
 			// Get the custom cache or use the default
-			const cachePath = join(componentPath, config.cache)
-			const Cache = config.cache ? await import(pathToFileURL(cachePath)) : HarperDBCache;
+			const Cache = config.cache
+				? await import(pathToFileURL(join(componentPath, config.cache)))
+				: HarperDBCache;
 
 			// Set up Apollo Server
-			const apollo = new ApolloServer({ typeDefs, resolvers: resolvers.default || resolvers, cache: new Cache() });
+			const apollo = new ApolloServer({
+				typeDefs,
+				resolvers: resolvers.default || resolvers,
+				cache: new Cache()
+			});
 
 			await apollo.start();
 
@@ -125,15 +126,15 @@ function streamToBuffer(stream) {
 
 class HarperDBCache extends Resource {
 
-	async get(key){
-			let data = await GraphQL.get(key);
-			return data?.get('query');
+	async get(key) {
+		let data = await GraphQL.get(key);
+		return data?.get('query');
 	}
 
-	async set(key, value, options){
+	async set(key, value, options) {
 		let context = this.getContext();
-		if(options?.ttl) {
-			if(!context) {
+		if (options?.ttl) {
+			if (!context) {
 				context = {};
 			}
 			//the ttl is in seconds
@@ -143,7 +144,7 @@ class HarperDBCache extends Resource {
 		await GraphQL.put({ id: key, query: value }, context);
 	}
 
-	async delete(key){
+	async delete(key) {
 		await GraphQL.delete(key);
 	}
 }
