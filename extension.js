@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, posix } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import { ApolloServer, HeaderMap } from '@apollo/server';
@@ -64,9 +64,10 @@ export function start(options = {}) {
 			const resolvers = await import(pathToFileURL(resolversPath));
 
 			// Load the schemas
-			const schemasPath = join(componentPath, config.schemas)
+			// posix.join is necessary so that `/` are retained, otherwise they get normalized to the platform
+			const schemasPath = posix.join(componentPath, config.schemas)
 			let typeDefs = BASE_SCHEMA;
-			for (const filePath of fastGlob.sync(fastGlob.convertPathToPattern(schemasPath), { onlyFiles: true })) {
+			for (const filePath of fastGlob.sync(schemasPath, { onlyFiles: true })) {
 				typeDefs += readFileSync(filePath, 'utf-8');
 			}
 
