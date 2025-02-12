@@ -68,7 +68,7 @@ export function start(options = {}) {
 			const schemasPath = posix.join(componentPath, config.schemas)
 			let typeDefs = BASE_SCHEMA;
 			for (const filePath of fastGlob.sync(schemasPath, { onlyFiles: true })) {
-				typeDefs += readFileSync(filePath, 'utf-8');
+				typeDefs += '\n' + readFileSync(filePath, 'utf-8');
 			}
 
 			// Get the custom cache or use the default
