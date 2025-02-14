@@ -52,35 +52,32 @@ export function start(options = {}) {
 		resolvers: options.resolvers ?? './resolvers.js',
 		schemas: options.schemas ?? './schemas.graphql',
 		securePort: options.securePort,
-	}
+	};
 
 	logger.debug('@harperdb/apollo extension configuration:\n' + JSON.stringify(config, null, 2));
 
 	return {
 		async handleDirectory(_, componentPath) {
-
 			// Load the resolvers
 			const resolversPath = join(componentPath, config.resolvers);
 			const resolvers = await import(pathToFileURL(resolversPath));
 
 			// Load the schemas
 			// posix.join is necessary so that `/` are retained, otherwise they get normalized to the platform
-			const schemasPath = posix.join(componentPath, config.schemas)
+			const schemasPath = posix.join(componentPath, config.schemas);
 			let typeDefs = BASE_SCHEMA;
 			for (const filePath of fastGlob.sync(schemasPath, { onlyFiles: true })) {
 				typeDefs += '\n' + readFileSync(filePath, 'utf-8');
 			}
 
 			// Get the custom cache or use the default
-			const Cache = config.cache
-				? await import(pathToFileURL(join(componentPath, config.cache)))
-				: HarperDBCache;
+			const Cache = config.cache ? await import(pathToFileURL(join(componentPath, config.cache))) : HarperDBCache;
 
 			// Set up Apollo Server
 			const apollo = new ApolloServer({
 				typeDefs,
 				resolvers: resolvers.default || resolvers,
-				cache: new Cache()
+				cache: new Cache(),
 			});
 
 			await apollo.start();
@@ -101,7 +98,7 @@ export function start(options = {}) {
 
 						const response = await apollo.executeHTTPGraphQLRequest({
 							httpGraphQLRequest: httpGraphQLRequest,
-							context: () => httpGraphQLRequest
+							context: () => httpGraphQLRequest,
 						});
 						response.body = response.body.string;
 						return response;
@@ -113,8 +110,8 @@ export function start(options = {}) {
 			);
 
 			return true;
-		}
-	}
+		},
+	};
 }
 
 function streamToBuffer(stream) {
@@ -127,7 +124,6 @@ function streamToBuffer(stream) {
 }
 
 class HarperDBCache extends Resource {
-
 	async get(key) {
 		let data = await GraphQL.get(key);
 		return data?.get('query');
@@ -140,7 +136,7 @@ class HarperDBCache extends Resource {
 				context = {};
 			}
 			//the ttl is in seconds
-			context.expiresAt = Date.now() + (options.ttl * 1000);
+			context.expiresAt = Date.now() + options.ttl * 1000;
 		}
 
 		await GraphQL.put({ id: key, query: value }, context);

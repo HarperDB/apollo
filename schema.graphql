@@ -1,3 +1,3 @@
 type GraphQL @table(database: "cache") {
-    id: ID @primaryKey
+	id: ID @primaryKey
 }

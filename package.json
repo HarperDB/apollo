@@ -1,10 +1,15 @@
 {
-  "name": "@harperdb/apollo",
-  "version": "1.0.0",
-  "description": "A HarperDB Component for running Apollo apps.",
-  "type": "module",
-  "dependencies": {
-    "@apollo/server": "^4.10.0",
-    "fast-glob": "^3.3.3"
-  }
+	"name": "@harperdb/apollo",
+	"version": "1.0.0",
+	"description": "A HarperDB Component for running Apollo apps.",
+	"type": "module",
+	"dependencies": {
+		"@apollo/server": "^4.10.0",
+		"fast-glob": "^3.3.3"
+	},
+	"devDependencies": {
+		"@harperdb/code-guidelines": "^0.0.2",
+		"prettier": "^3.5.1"
+	},
+	"prettier": "@harperdb/code-guidelines/prettier"
 }
