@@ -87,6 +87,7 @@ export function start(options = {}) {
 
 			server.http(
 				async (request, next) => {
+					// Parse the incoming request url so that the `pathname` and `search` can be used
 					const url = new URL(request.url, `http://${process.env.HOST ?? 'localhost'}`);
 					if (url.pathname === '/graphql') {
 						const body = await streamToBuffer(request.body);
