@@ -1,14 +1,13 @@
-import {
-	ApolloServer
-} from '@apollo/server';
+import { readFileSync } from 'node:fs';
+import { join, posix } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
-import { parse } from 'node:url';
-import {isMainThread} from 'node:worker_threads';
-import { pathToFileURL } from 'url';
+import { ApolloServer, HeaderMap } from '@apollo/server';
+import fastGlob from 'fast-glob';
 
-const {GraphQL} = databases.cache;
+const { GraphQL } = databases.cache;
 
-let graphql_schema = `
+const BASE_SCHEMA = `#graphql
 enum CacheControlScope {
   PUBLIC
   PRIVATE
@@ -45,45 +44,78 @@ scalar BigInt
 scalar Date
 scalar Any
 `;
-let resolvers = {};
-let apollo_options;
-let apollo;
-export function start(options) {
-	apollo_options = options;
-}
-export async function handleFile(content, url_path, file_path, resources) {
-	if (file_path.endsWith('.graphql'))
-		graphql_schema += content;
-	if (file_path.endsWith('.js')) {
-		const module_url = pathToFileURL(file_path).toString();
-		// load JS file and assign to resolvers
-		const module_exports = await import(module_url);
-		Object.assign(resolvers, module_exports.default || module_exports);
+
+export function start(options = {}) {
+	const config = {
+		cache: options.cache,
+		port: options.port,
+		resolvers: options.resolvers ?? './resolvers.js',
+		schemas: options.schemas ?? './schemas.graphql',
+		securePort: options.securePort,
+	}
+
+	logger.debug('@harperdb/apollo extension configuration:\n' + JSON.stringify(config, null, 2));
+
+	return {
+		async handleDirectory(_, componentPath) {
+
+			// Load the resolvers
+			const resolversPath = join(componentPath, config.resolvers);
+			const resolvers = await import(pathToFileURL(resolversPath));
+
+			// Load the schemas
+			// posix.join is necessary so that `/` are retained, otherwise they get normalized to the platform
+			const schemasPath = posix.join(componentPath, config.schemas)
+			let typeDefs = BASE_SCHEMA;
+			for (const filePath of fastGlob.sync(schemasPath, { onlyFiles: true })) {
+				typeDefs += '\n' + readFileSync(filePath, 'utf-8');
+			}
+
+			// Get the custom cache or use the default
+			const Cache = config.cache
+				? await import(pathToFileURL(join(componentPath, config.cache)))
+				: HarperDBCache;
+
+			// Set up Apollo Server
+			const apollo = new ApolloServer({
+				typeDefs,
+				resolvers: resolvers.default || resolvers,
+				cache: new Cache()
+			});
+
+			await apollo.start();
+
+			server.http(
+				async (request, next) => {
+					const url = new URL(request.url, `http://${process.env.HOST ?? 'localhost'}`);
+					if (url.pathname === '/graphql') {
+						const body = await streamToBuffer(request.body);
+
+						const httpGraphQLRequest = {
+							method: request.method,
+							headers: new HeaderMap(request.headers),
+							body: JSON.parse(body),
+							search: url.search,
+						};
+
+						const response = await apollo.executeHTTPGraphQLRequest({
+							httpGraphQLRequest: httpGraphQLRequest,
+							context: () => httpGraphQLRequest
+						});
+						response.body = response.body.string;
+						return response;
+					} else {
+						return next(request);
+					}
+				},
+				{ port: config.port, securePort: config.securePort }
+			);
+
+			return true;
+		}
 	}
 }
-export async function ready() {
-	if (isMainThread || apollo) return;
-	apollo = new ApolloServer({
-		typeDefs: graphql_schema,
-		resolvers,
-		cache: new HarperDBCache()
-	})
-	await apollo.start();
-	server.http(async (request, next_handler) => {
-		if (request.url === '/graphql') {
-			let body = await streamToBuffer(request.body);
-			request = Object.assign({}, request);
-			request.body = JSON.parse(body);
-			request.search = parse(request.url).search || '';
-			let response = await apollo.executeHTTPGraphQLRequest({
-				httpGraphQLRequest: request,
-				context: () => request,
-			});
-			response.body = response.body.string;
-			return response;
-		} else return next_handler(request);
-	}, apollo_options);
-}
+
 function streamToBuffer(stream) {
 	return new Promise((resolve, reject) => {
 		const buffers = [];
@@ -95,15 +127,15 @@ function streamToBuffer(stream) {
 
 class HarperDBCache extends Resource {
 
-	async get(key){
-			let data = await GraphQL.get(key);
-			return data?.get('query');
+	async get(key) {
+		let data = await GraphQL.get(key);
+		return data?.get('query');
 	}
 
-	async set(key, value, options){
+	async set(key, value, options) {
 		let context = this.getContext();
-		if(options?.ttl) {
-			if(!context) {
+		if (options?.ttl) {
+			if (!context) {
 				context = {};
 			}
 			//the ttl is in seconds
@@ -113,7 +145,7 @@ class HarperDBCache extends Resource {
 		await GraphQL.put({ id: key, query: value }, context);
 	}
 
-	async delete(key){
+	async delete(key) {
 		await GraphQL.delete(key);
 	}
 }
