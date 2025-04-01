@@ -48,6 +48,26 @@ const resolvers = {
 export default resolvers;
 ```
 
+### `plugins: string`
+
+Specify a path to an Apollo plugins JavaScript file.
+
+Must be set to a singular path of a JavaScript file containing a default export of Apollo plugins.
+
+For example:
+
+```js
+const customPlugin = {
+	async serverWillStart() {
+		console.log('Server starting up!');
+	},
+};
+
+const plugins = [customPlugin];
+
+export default plugins;
+```
+
 ### `schemas: string`
 
 Specify a glob path to Apollo schema files.
