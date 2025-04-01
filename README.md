@@ -57,9 +57,15 @@ Must be set to a singular path of a JavaScript file containing a default export 
 For example:
 
 ```js
+// Example setting custom response headers
 const customPlugin = {
-	async serverWillStart() {
-		console.log('Server starting up!');
+	async requestDidStart() {
+		return {
+			async willSendResponse(requestContext) {
+				const { response } = requestContext;
+				response.http.headers.set('x-foo', 'bar');
+			},
+		};
 	},
 };
 

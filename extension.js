@@ -74,7 +74,12 @@ export function start(options = {}) {
 			// Get the custom cache or use the default
 			const Cache = config.cache ? await import(pathToFileURL(join(componentPath, config.cache))) : HarperDBCache;
 
-			const plugins = await resolvePlugins(componentPath, config.plugins);
+			// Load the plugins
+			let plugins;
+			if (config.plugins) {
+				const pluginsPath = join(componentPath, config.plugins);
+				 ({ default: plugins } = await import(pathToFileURL(pluginsPath)));
+			}
 
 			// Set up Apollo Server
 			const apollo = new ApolloServer({
@@ -149,15 +154,4 @@ class HarperDBCache extends Resource {
 	async delete(key) {
 		await GraphQL.delete(key);
 	}
-}
-
-async function resolvePlugins(componentPath, pluginsPath) {
-	if (!pluginsPath) {
-		return undefined;
-	}
-
-	const absolutePath = join(componentPath, pluginsPath);
-	const module = await import(pathToFileURL(absolutePath));
-
-	return module.default;
 }
