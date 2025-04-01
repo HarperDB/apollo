@@ -52,7 +52,7 @@ export function start(options = {}) {
 		resolvers: options.resolvers ?? './resolvers.js',
 		schemas: options.schemas ?? './schemas.graphql',
 		securePort: options.securePort,
-		plugins: options.plugins ?? './plugins.js',
+		plugins: options.plugins,
 	};
 
 	logger.debug('@harperdb/apollo extension configuration:\n' + JSON.stringify(config, null, 2));
