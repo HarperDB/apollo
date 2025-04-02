@@ -10,7 +10,13 @@ If you don't know where to get started, check out the [apollo-example](https://g
 
 ## Options
 
-> All configuration options are optional
+### Required
+
+### `files: string`
+
+Specifies the directory that contains your configuration files.
+
+### Optional
 
 ### `cache: string`
 
