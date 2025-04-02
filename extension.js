@@ -52,6 +52,7 @@ export function start(options = {}) {
 		resolvers: options.resolvers ?? './resolvers.js',
 		schemas: options.schemas ?? './schemas.graphql',
 		securePort: options.securePort,
+		plugins: options.plugins,
 	};
 
 	logger.debug('@harperdb/apollo extension configuration:\n' + JSON.stringify(config, null, 2));
@@ -73,11 +74,19 @@ export function start(options = {}) {
 			// Get the custom cache or use the default
 			const Cache = config.cache ? await import(pathToFileURL(join(componentPath, config.cache))) : HarperDBCache;
 
+			// Load the plugins
+			let plugins;
+			if (config.plugins) {
+				const pluginsPath = join(componentPath, config.plugins);
+				 ({ default: plugins } = await import(pathToFileURL(pluginsPath)));
+			}
+
 			// Set up Apollo Server
 			const apollo = new ApolloServer({
 				typeDefs,
 				resolvers: resolvers.default || resolvers,
 				cache: new Cache(),
+				plugins
 			});
 
 			await apollo.start();
