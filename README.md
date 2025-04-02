@@ -6,6 +6,8 @@ A [HarperDB Component](https://docs.harperdb.io/docs/developers/components) for 
 
 Most Apollo features are supported as this component relies on the `ApolloServer` provided by `@apollo/server`.
 
+If you don't know where to get started, check out the [apollo-example](https://github.com/HarperDB/apollo-example) starter project.
+
 ## Options
 
 > All configuration options are optional
