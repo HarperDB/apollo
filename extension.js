@@ -53,7 +53,7 @@ export function start(options = {}) {
 		schemas: options.schemas ?? './schemas.graphql',
 		securePort: options.securePort,
 		plugins: options.plugins,
-		introspection: options.introspection ?? process.env.NODE_ENV !== 'production',
+		introspection: options.introspection,
 	};
 
 	logger.debug('@harperdb/apollo extension configuration:\n' + JSON.stringify(config, null, 2));
