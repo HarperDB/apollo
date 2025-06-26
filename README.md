@@ -93,3 +93,7 @@ For example, if all schemas are located in `src/schemas/`, the setting here woul
 ### `securePort: number`
 
 Specify a secure port for the Apollo server. Defaults to the HarperDB default secure port.
+
+### `introspection: boolean`
+
+Enable/disable GraphQL introspection

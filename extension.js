@@ -53,6 +53,7 @@ export function start(options = {}) {
 		schemas: options.schemas ?? './schemas.graphql',
 		securePort: options.securePort,
 		plugins: options.plugins,
+		introspection: options.introspection,
 	};
 
 	logger.debug('@harperdb/apollo extension configuration:\n' + JSON.stringify(config, null, 2));
@@ -78,7 +79,7 @@ export function start(options = {}) {
 			let plugins;
 			if (config.plugins) {
 				const pluginsPath = join(componentPath, config.plugins);
-				 ({ default: plugins } = await import(pathToFileURL(pluginsPath)));
+				({ default: plugins } = await import(pathToFileURL(pluginsPath)));
 			}
 
 			// Set up Apollo Server
@@ -86,7 +87,8 @@ export function start(options = {}) {
 				typeDefs,
 				resolvers: resolvers.default || resolvers,
 				cache: new Cache(),
-				plugins
+				plugins,
+				introspection: config.introspection
 			});
 
 			await apollo.start();
