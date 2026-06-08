@@ -73,7 +73,7 @@ export function start(options = {}) {
 			}
 
 			// Get the custom cache or use the default
-			const Cache = config.cache ? await import(pathToFileURL(join(componentPath, config.cache))) : HarperDBCache;
+			const Cache = config.cache ? await import(pathToFileURL(join(componentPath, config.cache))) : HarperCache;
 
 			// Load the plugins
 			let plugins;
@@ -134,7 +134,7 @@ function streamToBuffer(stream) {
 	});
 }
 
-class HarperDBCache extends Resource {
+class HarperCache extends Resource {
 	async get(key) {
 		let data = await GraphQL.get(key);
 		return data?.get('query');

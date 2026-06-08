@@ -1,7 +1,7 @@
 {
 	"name": "@harperdb/apollo",
 	"version": "1.2.0",
-	"description": "A HarperDB Component for running Apollo apps.",
+	"description": "A Harper Component for running Apollo apps.",
 	"type": "module",
 	"dependencies": {
 		"@apollo/server": "^4.10.0",
@@ -9,7 +9,13 @@
 	},
 	"devDependencies": {
 		"@harperdb/code-guidelines": "^0.0.2",
-		"prettier": "^3.5.1"
+		"@harperfast/integration-testing": "^0.4.0",
+		"harper": "^5.0.28",
+		"prettier": "^3.5.1",
+		"typescript": "^6.0.3"
+	},
+	"scripts": {
+		"test:integration": "harper-integration-test-run integrationTests/**/*.test.ts"
 	},
 	"prettier": "@harperdb/code-guidelines/prettier",
 	"license": "Apache-2.0"

@@ -1,0 +1,9 @@
+{
+	"name": "apollo-fixture",
+	"version": "1.0.0",
+	"description": "Minimal Harper fixture app for @harperdb/apollo integration tests",
+	"type": "module",
+	"dependencies": {
+		"@harperdb/apollo": "file:../../"
+	}
+}
