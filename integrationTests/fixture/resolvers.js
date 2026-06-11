@@ -16,7 +16,9 @@ const resolvers = {
 			return args;
 		},
 		deleteItem: async (parent, args) => {
-			return Item.delete(args.id);
+			const item = await Item.get(args.id);
+			await Item.delete(args.id);
+			return item ?? null;
 		},
 	},
 };

@@ -35,6 +35,7 @@ async function gql(
 		headers: { 'Content-Type': 'application/json', Authorization: auth },
 		body: JSON.stringify({ query, variables }),
 	});
+	if (!res.ok) throw new Error('GraphQL request failed: HTTP ' + res.status + ' ' + res.statusText + ' — ' + await res.text());
 	return res.json() as Promise<{ data: Record<string, unknown>; errors?: unknown[] }>;
 }
 
@@ -117,7 +118,8 @@ suite('Apollo GraphQL extension', (ctx: ContextWithHarper) => {
 		strictEqual(gotItem!.value, 42);
 
 		// Delete
-		await gql(httpURL, auth, 'mutation { deleteItem(id: "test-1") { id } }');
+		const deleteResult = await gql(httpURL, auth, 'mutation { deleteItem(id: "test-1") { id } }');
+		ok(!deleteResult.errors, 'deleteItem errored: ' + JSON.stringify(deleteResult.errors));
 
 		// Confirm gone
 		const goneResult = await gql(httpURL, auth, '{ item(id: "test-1") { id } }');
