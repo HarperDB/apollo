@@ -4,7 +4,8 @@ bin-release/
 [Oo]bj/
 [Bb]in/
 node_modules
-package-lock.json
+integrationTests/packed/
+integrationTests/fixture/package-lock.json
 
 # Other files and folders
 .settings/

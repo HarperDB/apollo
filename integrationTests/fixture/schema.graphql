@@ -1,0 +1,15 @@
+type Item @table(database: "demo") @export {
+	id: ID @primaryKey
+	name: String @indexed
+	value: Int
+}
+
+type Query {
+	item(id: ID!): Item
+	items: [Item]
+}
+
+type Mutation {
+	putItem(id: ID!, name: String, value: Int): Item
+	deleteItem(id: ID!): Item
+}

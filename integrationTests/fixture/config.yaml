@@ -1,0 +1,10 @@
+rest: true
+graphqlSchema:
+  files: '*.graphql'
+jsResource:
+  files: resources.js
+'@harperdb/apollo':
+  package: '@harperdb/apollo'
+  files: '*.{graphql,js}'
+  resolvers: 'resolvers.js'
+  schemas: '*.graphql'

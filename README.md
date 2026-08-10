@@ -1,6 +1,6 @@
 # @harperdb/apollo
 
-A [HarperDB Component](https://docs.harperdb.io/docs/developers/components) for running and developing Apollo GraphQL backend services.
+A [Harper Component](https://docs.harperdb.io/docs/developers/components) for running and developing Apollo GraphQL backend services.
 
 ![NPM Version](https://img.shields.io/npm/v/%40harperdb%2Fapollo)
 
@@ -36,7 +36,7 @@ export default CustomCache;
 
 ### `port: number`
 
-Specify a port for the Apollo server. Defaults to the HarperDB default port (generally `9926`).
+Specify a port for the Apollo server. Defaults to the Harper default port (generally `9926`).
 
 ### `resolvers: string`
 
@@ -92,7 +92,7 @@ For example, if all schemas are located in `src/schemas/`, the setting here woul
 
 ### `securePort: number`
 
-Specify a secure port for the Apollo server. Defaults to the HarperDB default secure port.
+Specify a secure port for the Apollo server. Defaults to the Harper default secure port.
 
 ### `introspection: boolean`
 
